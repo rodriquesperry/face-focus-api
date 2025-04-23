@@ -45,6 +45,6 @@ app.post('/api/image', (req, res) => entries.handleEntriesIncrease(req, res, db)
 
 app.post('/detect-face', (req, res) => image.handleDetectFace(req, res));
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
 	console.log(`app is runngin on port ${PORT}!!!`);
 });
