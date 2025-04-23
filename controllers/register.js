@@ -1,5 +1,12 @@
-const handleRegister = async (req, res, db, hashPassword, uuidv4, sequelize) => {
-  sequelize.sync();
+const handleRegister = async (
+	req,
+	res,
+	db,
+	hashPassword,
+	uuidv4,
+	sequelize
+) => {
+	sequelize.sync();
 	const { name, email, password } = req.body;
 
 	if (!name || !email || !password) {
