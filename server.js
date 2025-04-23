@@ -10,6 +10,7 @@ const signIn = require('./controllers/signin.js');
 const entries = require('./controllers/entries.js');
 const profile = require('./controllers/profile.js');
 const image = require('./controllers/detectFace.js');
+const PORT = process.env.PORT || 8080;
 
 const app = express();
 
@@ -44,6 +45,6 @@ app.post('/api/image', (req, res) => entries.handleEntriesIncrease(req, res, db)
 
 app.post('/detect-face', (req, res) => image.handleDetectFace(req, res));
 
-app.listen(8080, () => {
-	console.log('app is runngin on port 8080!!!');
+app.listen(PORT, () => {
+	console.log(`app is runngin on port ${PORT}!!!`);
 });
