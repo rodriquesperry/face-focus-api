@@ -6,7 +6,6 @@ const handleRegister = async (
 	uuidv4,
 	sequelize
 ) => {
-	sequelize.sync();
 	const { name, email, password } = req.body;
 
 	if (!name || !email || !password) {
