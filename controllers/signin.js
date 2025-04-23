@@ -1,5 +1,6 @@
 
 const handleSignin = async (req, res, db, verifyPassword, sequelize) => {
+  sequelize.sync();
 	const { email, password } = req.body;
 
 	try {

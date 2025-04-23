@@ -37,7 +37,7 @@ app.post('/',(req, res) => signIn.handleSignin(req, res, db, verifyPassword, seq
 
 app.get('/home', (req, res) => res.send('home page'));
 
-app.post('/register',(req, res) => register.handleRegister(req, res, db, hashPassword, uuidv4));
+app.post('/register',(req, res) => register.handleRegister(req, res, db, hashPassword, uuidv4, sequelize));
 
 app.get('/profile/:id', (req, res) => profile.handleProfile(req, res, db));
 
