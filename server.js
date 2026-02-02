@@ -7,6 +7,7 @@ const db = require('./models/index.js');
 
 const register = require('./controllers/register.js');
 const signIn = require('./controllers/signin.js');
+const getAll = require('./controllers/getAll.js');
 const entries = require('./controllers/entries.js');
 const profile = require('./controllers/profile.js');
 const image = require('./controllers/detectFace.js');
