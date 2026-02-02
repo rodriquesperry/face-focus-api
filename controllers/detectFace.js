@@ -10,10 +10,12 @@ const handleDetectFace = async (req, res) => {
     return res.status(400).json({ error: "imgUrl is required" });
   }
 
-  const pat = process.env.CLARIFAI_PAT;
-  if (!pat) {
-    return res.status(500).json({ error: "Missing CLARIFAI_PAT env var" });
+  const pat = process.env.CLARIFAI_PAT?.trim();
+
+  if (!pat || pat.length < 20) {
+  return res.status(500).json({ error: "Missing/invalid CLARIFAI_PAT env var" });
   }
+
 
   try {
     // Create model instance using URL (no version lookup headaches)
