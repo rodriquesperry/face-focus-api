@@ -1,56 +1,63 @@
-// Your PAT (Personal Access Token) can be found in the Account's Security section
-const PAT = 'c54460b16f71448d9bd4526ba359d620';
-// Specify the correct User_id/app_id pairings
-// Since you're making inferences outside your app's scope
-const USER_ID = 'clarifai';
-const APP_ID = 'main';
-// Change these to whatever model and image URL you want to use
-const MODEL_ID = 'face-detection';
-const MODEL_VERSION_ID = '6dc7e46bc9124c5c8824be4822abe105';
+// controllers/detectFace.js
+const { Model } = require("clarifai-nodejs");
 
+const modelUrl = "https://clarifai.com/clarifai/main/models/face-detection";
 
 const handleDetectFace = async (req, res) => {
-	const { imgUrl } = req.body;
+  const { imgUrl } = req.body;
 
-	const raw = JSON.stringify({
-		user_app_id: {
-			user_id: USER_ID,
-			app_id: APP_ID,
-		},
-		inputs: [
-			{
-				data: {
-					image: {
-						url: imgUrl,
-						// "base64": IMAGE_BYTES_STRING
-					},
-				},
-			},
-		],
-	});
+  if (!imgUrl) {
+    return res.status(400).json({ error: "imgUrl is required" });
+  }
 
-	const requestOptions = {
-		method: 'POST',
-		headers: {
-			Accept: 'application/json',
-			Authorization: 'Key ' + PAT,
-		},
-		body: raw,
-	};
+  const pat = process.env.CLARIFAI_PAT;
+  if (!pat) {
+    return res.status(500).json({ error: "Missing CLARIFAI_PAT env var" });
+  }
 
-	try {
-		const response = await fetch(
-			`https://api.clarifai.com/v2/models/${MODEL_ID}/versions/${MODEL_VERSION_ID}/outputs`,
-			requestOptions
-		);
-		const data = await response.json();
-		res.json(data);
-	} catch (error) {
-		console.error('Error calling Clarifai API: ', error);
-		res.status(500).json({ error: 'Error processing request.' });
-	}
+  try {
+    // Create model instance using URL (no version lookup headaches)
+    const model = new Model({
+      url: modelUrl,
+      authConfig: { pat },
+    });
+
+    const prediction = await model.predictByUrl({
+      url: imgUrl,
+      inputType: "image",
+    });
+
+    // prediction is an array; your frontend expects outputs[0].data.regions
+    // Clarifai SDK uses regionsList (protobuf naming), so normalize it:
+    const regionsList = prediction?.[0]?.data?.regionsList || [];
+
+    // Convert to a Clarifai-REST-ish shape your frontend already handles
+    return res.json({
+      outputs: [
+        {
+          data: {
+            regions: regionsList.map((r) => ({
+              region_info: {
+                bounding_box: {
+                  top_row: r?.regionInfo?.boundingBox?.topRow,
+                  left_col: r?.regionInfo?.boundingBox?.leftCol,
+                  bottom_row: r?.regionInfo?.boundingBox?.bottomRow,
+                  right_col: r?.regionInfo?.boundingBox?.rightCol,
+                },
+              },
+            })),
+          },
+        },
+      ],
+    });
+  } catch (err) {
+    console.error("Clarifai error:", err);
+    return res.status(502).json({
+      error: "clarifai_error",
+      message: err?.message,
+      status: err?.status || err?.response?.status,
+    });
+  }
 };
 
-module.exports = {
-	handleDetectFace: handleDetectFace,
-};
+module.exports = { handleDetectFace };
